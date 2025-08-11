@@ -13,7 +13,7 @@ const kaplayCongrats = () => {
 };
 
 export default defineConfig({
-  base: "./",
+  base: "/code_name",
   server: {
     port: 5000,
   },
