@@ -53,16 +53,6 @@ export function createSwingRope(anchor, radius) {
       width: 2,
       color: [0, 0, 0],
     });
-
-    const dir = player.vel.unit().scale(40);
-    const endPos = player.pos.add(dir);
-
-    drawLine({
-      p1: player.pos,
-      p2: endPos,
-      width: 2,
-      color: BLUE,
-    });
   }
 
   function setAnchor(newAnchor) {

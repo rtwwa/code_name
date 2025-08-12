@@ -3,7 +3,7 @@ import { createSwingRope } from "../../rope";
 const HOOK_IMPULSE = 400;
 const HOOK_LEN = 120;
 
-export function createHook(player) {
+export function initHookAbility(player) {
   const rope = createSwingRope(vec2(0, 0), HOOK_LEN);
   let updateRope = false;
 
@@ -12,14 +12,18 @@ export function createHook(player) {
   onKeyPress("z", () => {
     // if rope is not active, release new rope
     if (updateRope == false) {
-      releaseHook(player, rope);
-      updateRope = true;
+      let isSuccess = releaseHook(player, rope);
+      isSuccess ? (updateRope = true) : null;
       return;
     }
 
     // otherwise, remove the hook and set false updateRope flag
     updateRope = false;
     removeHook(player);
+  });
+
+  onKeyPress("down", () => {
+    if (updateRope == true) updateRope = false;
   });
 
   onUpdate(() => {
@@ -34,15 +38,19 @@ export function createHook(player) {
     }
   });
 
+  const isHooked = () => {
+    return updateRope;
+  };
+
   return {
-    isHooked: updateRope,
+    isHooked: isHooked,
   };
 }
 
 const releaseHook = (player, rope) => {
   const hit = getNewHookPoint(player);
   if (hit == null) {
-    return;
+    return false;
   }
 
   rope.setAnchor(hit);
@@ -53,6 +61,8 @@ const releaseHook = (player, rope) => {
   } else {
     rope.setRadius(HOOK_LEN);
   }
+
+  return true;
 };
 
 const removeHook = (player) => {

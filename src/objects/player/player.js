@@ -1,8 +1,8 @@
-import { createSwingRope } from "../rope";
-import { createHook } from "./abilities/hook";
+import { initAttachAbility } from "./abilities/attach";
+import { initDashAbility } from "./abilities/dash";
+import { initHookAbility } from "./abilities/hook";
 import { createFootstepEmitter } from "./particles";
 
-const IMPULSE_FORCE = 500;
 const JUMP_FORCE = -600;
 const SPEED = 200;
 const DRAG_ON_GROUND = 7;
@@ -30,8 +30,11 @@ export const spawnPlayer = (position) => {
 
   // Player variables
   player.lastDirection = 1;
-  let isAttached = false;
-  let attachedPos = null;
+
+  // Abilities
+  const dashAbility = initDashAbility(player);
+  const attachAbility = initAttachAbility(player, JUMP_FORCE);
+  const hookAbility = initHookAbility(player);
 
   // Player movement
   onKeyDown("left", () => {
@@ -47,31 +50,17 @@ export const spawnPlayer = (position) => {
   });
 
   onKeyPress("up", () => {
-    if (player.isGrounded() || isAttached) {
-      disattachWall();
+    if (player.isGrounded()) {
       player.applyImpulse(vec2(0, JUMP_FORCE));
     }
   });
 
-  onKeyPress("x", () => {
-    dash();
-  });
-
   // Physics
   player.onUpdate(() => {
-    if (hook.isHooded) {
-      console.log("hello");
-    }
-
     if (player.isGrounded()) {
       player.drag = DRAG_ON_GROUND;
     } else {
       player.drag = 0;
-    }
-
-    if (isAttached && attachedPos) {
-      player.pos = attachedPos.clone();
-      player.vel = vec2(0, 0);
     }
 
     if (player.isGrounded()) {
@@ -89,44 +78,10 @@ export const spawnPlayer = (position) => {
     }
   });
 
-  player.onCollide("solid", (collision) => {
-    if (!isAttached && Math.abs(player.vel.x) > 2 && !player.isGrounded()) {
-      isAttached = true;
-      attachedPos = player.pos;
-
-      player.vel = vec2(0, 0);
-
-      player.gravity = 0;
-
-      shake(5);
-    }
-  });
-
-  onKeyPress("down", () => {
-    disattachWall();
-  });
-
-  function disattachWall() {
-    if (isAttached) {
-      isAttached = false;
-      attachedPos = null;
-      player.gravity = 1;
-
-      shake(1);
-      player.vel = vec2(player.vel.x, -5);
-    }
-  }
-
-  const hook = createHook(player);
-  console.log(hook);
-
+  // Particlies
   loadSprite("dust", "./sprites/dust.png").then(() => {
     const footsteps = createFootstepEmitter(player);
   });
-
-  function dash() {
-    player.applyImpulse(vec2(IMPULSE_FORCE * player.lastDirection, 0));
-  }
 
   return player;
 };
