@@ -87,6 +87,16 @@ export const spawnPlayer = () => {
       }
 
       rope.setAnchor(ropePivot);
+
+      const dist = ropePivot.sub(player.pos).len();
+      if (dist < HOOK_LEN) {
+        rope.setRadius(dist);
+      } else {
+        rope.setRadius(HOOK_LEN);
+      }
+
+      console.log(rope.radius);
+
       updateRope = true;
     });
     onKeyPress("down", () => {
@@ -95,7 +105,6 @@ export const spawnPlayer = () => {
       updateRope = false;
       let newDir = Vec2.fromAngle(-45).scale(HOOK_IMPULSE);
       newDir.x = newDir.x * player.lastDirection;
-      console.log(newDir);
       player.applyImpulse(newDir);
     });
 
