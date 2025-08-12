@@ -6,10 +6,17 @@ const SPEED = 200;
 const DRAG_ON_GROUND = 7;
 
 export const spawnPlayer = () => {
-  loadSprite("hero", "./sprites/hero.png");
+  loadSprite("hero_afk", "./sprites/hero-afk.png", {
+    sliceX: 8,
+    sliceY: 1,
+    anims: {
+      afk: 0,
+      idle: { from: 0, to: 7, loop: true },
+    },
+  });
 
   const player = add([
-    sprite("hero"),
+    sprite("hero_afk"),
     pos(center()),
     area(),
     body(),
@@ -17,6 +24,9 @@ export const spawnPlayer = () => {
     color(0, 0, 0),
     "player",
   ]);
+
+  player.play("idle");
+  console.log(getSprite("hero_afk"));
 
   player.lastDirection = Vec2.fromAngle(-45);
 
