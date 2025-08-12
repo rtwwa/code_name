@@ -8,7 +8,7 @@ const DRAG_ON_GROUND = 7;
 const HOOK_IMPULSE = 400;
 const HOOK_LEN = 120;
 
-export const spawnPlayer = () => {
+export const spawnPlayer = (position) => {
   loadSprite("hero_afk", "./sprites/hero-afk.png", {
     sliceX: 8,
     sliceY: 1,
@@ -20,7 +20,7 @@ export const spawnPlayer = () => {
 
   const player = add([
     sprite("hero_afk"),
-    pos(center()),
+    pos(position),
     area(),
     body(),
     anchor("center"),
@@ -31,7 +31,9 @@ export const spawnPlayer = () => {
   player.play("idle");
 
   // Player variables
-  player.lastDirection = Vec2.fromAngle(-45);
+  player.lastDirection = 1;
+  let isAttached = false;
+  let attachedPos = null;
 
   // Player movement
   onKeyDown("left", () => {
@@ -46,8 +48,9 @@ export const spawnPlayer = () => {
     player.lastDirection = 1;
   });
 
-  onKeyPress("space", () => {
-    if (player.isGrounded()) {
+  onKeyPress("up", () => {
+    if (player.isGrounded() || isAttached) {
+      disattachWall();
       player.applyImpulse(vec2(0, JUMP_FORCE));
     }
   });
@@ -63,12 +66,41 @@ export const spawnPlayer = () => {
     } else {
       player.drag = 0;
     }
+
+    if (isAttached && attachedPos) {
+      player.pos = attachedPos.clone();
+      player.vel = vec2(0, 0);
+    }
   });
 
-  player.onCollide("solid", () => {
-    if (player.vel.x > 2 || player.vel.x < -2) shake(5);
-    player.vel = vec2(player.vel.x * -1, player.vel.y);
+  player.onCollide("solid", (collision) => {
+    if (!isAttached && Math.abs(player.vel.x) > 2 && !player.isGrounded()) {
+      isAttached = true;
+      attachedPos = player.pos;
+
+      player.vel = vec2(0, 0);
+
+      player.gravity = 0;
+
+      shake(5);
+    }
   });
+
+  // Отцепиться по нажатию вниз (или другой кнопки)
+  onKeyPress("down", () => {
+    disattachWall();
+  });
+
+  function disattachWall() {
+    if (isAttached) {
+      isAttached = false;
+      attachedPos = null;
+      player.gravity = 1;
+
+      shake(1);
+      player.vel = vec2(player.vel.x, -5);
+    }
+  }
 
   function hook() {
     let updateRope = false;

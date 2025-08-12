@@ -5,7 +5,6 @@ export function createSwingRope(anchor, radius) {
   const damping = 0.995; // трение
 
   let player = null;
-  let hasBounce = false;
 
   function attach(entity) {
     player = entity;
@@ -18,15 +17,6 @@ export function createSwingRope(anchor, radius) {
   function applyImpulse(force) {
     angularVelocity += force;
   }
-
-  onCollide("player", "solid", () => {
-    if (!hasBounce) {
-      angularVelocity = -angularVelocity * 1.5;
-      hasBounce = true;
-    }
-
-    angularVelocity = -angularVelocity * 0.8;
-  });
 
   function update(dt) {
     if (!player) return;
@@ -82,7 +72,6 @@ export function createSwingRope(anchor, radius) {
       const dy = player.pos.y - anchor.y;
       angle = Math.atan2(dy, dx);
       angularVelocity = 0;
-      hasBounce = false;
     }
   }
 
