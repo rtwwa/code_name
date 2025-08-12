@@ -19,5 +19,3 @@ App.init(k);
 
 App.addScene("test", test_scene);
 App.startScene("test");
-
-k.onClick(() => k.addKaboom(k.mousePos()));

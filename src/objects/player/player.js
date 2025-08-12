@@ -1,25 +1,25 @@
-import { createSwingRope } from "../objects/rope";
+import { createSwingRope } from "../rope";
+import { createHook } from "./abilities/hook";
+import { createFootstepEmitter } from "./particles";
 
 const IMPULSE_FORCE = 500;
 const JUMP_FORCE = -600;
 const SPEED = 200;
 const DRAG_ON_GROUND = 7;
 
-const HOOK_IMPULSE = 400;
-const HOOK_LEN = 120;
-
 export const spawnPlayer = (position) => {
-  loadSprite("hero_afk", "./sprites/hero-afk.png", {
+  loadSprite("hero", "./sprites/all.png", {
     sliceX: 8,
-    sliceY: 1,
+    sliceY: 2,
     anims: {
       afk: 0,
       idle: { from: 0, to: 7, loop: true },
+      walk: { from: 8, to: 14, loop: true },
     },
   });
 
   const player = add([
-    sprite("hero_afk"),
+    sprite("hero"),
     pos(position),
     area(),
     body(),
@@ -27,8 +27,6 @@ export const spawnPlayer = (position) => {
     color(0, 0, 0),
     "player",
   ]);
-
-  player.play("idle");
 
   // Player variables
   player.lastDirection = 1;
@@ -56,11 +54,15 @@ export const spawnPlayer = (position) => {
   });
 
   onKeyPress("x", () => {
-    player.applyImpulse(vec2(IMPULSE_FORCE * player.lastDirection, 0));
+    dash();
   });
 
   // Physics
   player.onUpdate(() => {
+    if (hook.isHooded) {
+      console.log("hello");
+    }
+
     if (player.isGrounded()) {
       player.drag = DRAG_ON_GROUND;
     } else {
@@ -70,6 +72,20 @@ export const spawnPlayer = (position) => {
     if (isAttached && attachedPos) {
       player.pos = attachedPos.clone();
       player.vel = vec2(0, 0);
+    }
+
+    if (player.isGrounded()) {
+      if (isKeyDown("left") || isKeyDown("right")) {
+        if (player.curAnim() == "walk") return;
+
+        player.play("walk");
+      } else {
+        if (player.curAnim() == "idle") return;
+
+        player.play("idle");
+      }
+    } else {
+      player.play("afk");
     }
   });
 
@@ -86,7 +102,6 @@ export const spawnPlayer = (position) => {
     }
   });
 
-  // Отцепиться по нажатию вниз (или другой кнопки)
   onKeyPress("down", () => {
     disattachWall();
   });
@@ -102,66 +117,16 @@ export const spawnPlayer = (position) => {
     }
   }
 
-  function hook() {
-    let updateRope = false;
-    const rope = createSwingRope(vec2(0, 0), HOOK_LEN);
-    rope.attach(player);
+  const hook = createHook(player);
+  console.log(hook);
 
-    onKeyPress("z", () => {
-      if (updateRope == false) {
-        const hit = getNewHookPoint();
-        if (hit == null) {
-          return;
-        }
+  loadSprite("dust", "./sprites/dust.png").then(() => {
+    const footsteps = createFootstepEmitter(player);
+  });
 
-        rope.setAnchor(hit);
-
-        const hook_len = hit.sub(player.pos).len();
-        if (hook_len < HOOK_LEN) {
-          rope.setRadius(hook_len);
-        } else {
-          rope.setRadius(HOOK_LEN);
-        }
-
-        updateRope = true;
-        return;
-      }
-
-      updateRope = false;
-      let newDir = Vec2.fromAngle(-45).scale(HOOK_IMPULSE);
-      newDir.x = newDir.x * player.lastDirection;
-      player.applyImpulse(newDir);
-      return;
-    });
-
-    onUpdate(() => {
-      if (updateRope) {
-        rope.update(dt);
-      }
-    });
-
-    onDraw(() => {
-      if (updateRope) {
-        rope.draw();
-      }
-    });
+  function dash() {
+    player.applyImpulse(vec2(IMPULSE_FORCE * player.lastDirection, 0));
   }
-
-  const getNewHookPoint = () => {
-    let direction = Vec2.fromAngle(-45);
-    player.lastDirection > 0
-      ? (direction.x = direction.x)
-      : (direction.x = -direction.x);
-    let hit = raycast(player.pos, direction.scale(HOOK_LEN), ["player"]);
-
-    if (hit) {
-      return hit.point;
-    }
-
-    return null;
-  };
-
-  hook();
 
   return player;
 };

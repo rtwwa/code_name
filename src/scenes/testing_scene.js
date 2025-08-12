@@ -1,4 +1,4 @@
-import { spawnPlayer } from "./player";
+import { spawnPlayer } from "../objects/player/player";
 
 export const test_scene = () => {
   let player = spawnPlayer(vec2(width() / 6 + 50, height() - 200));
@@ -9,6 +9,7 @@ export const test_scene = () => {
     area(),
     body({ isStatic: true }),
     color(0, 0, 0),
+    "solid",
   ]);
 
   add([
@@ -17,6 +18,7 @@ export const test_scene = () => {
     area(),
     body({ isStatic: true }),
     color(0, 0, 0),
+    "solid",
   ]);
 
   add([
