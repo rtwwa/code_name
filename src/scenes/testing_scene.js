@@ -8,6 +8,7 @@ export const test_scene = () => {
     pos(0, height() - 20),
     area(),
     body({ isStatic: true }),
+    color(0, 0, 0),
   ]);
 
   add([
@@ -15,6 +16,7 @@ export const test_scene = () => {
     pos((width() / 3) * 2, height() - 20),
     area(),
     body({ isStatic: true }),
+    color(0, 0, 0),
   ]);
 
   add([
@@ -22,6 +24,7 @@ export const test_scene = () => {
     pos(width() / 4, height() - 200),
     area(),
     body({ isStatic: true }),
+    color(0, 0, 0),
   ]);
 
   add([
@@ -29,6 +32,7 @@ export const test_scene = () => {
     pos(width() - 20, 0),
     area(),
     body({ isStatic: true }),
+    color(0, 0, 0),
     "solid",
   ]);
 
@@ -37,6 +41,7 @@ export const test_scene = () => {
     pos(0, 0),
     area(),
     body({ isStatic: true }),
+    color(0, 0, 0),
     "solid",
   ]);
 

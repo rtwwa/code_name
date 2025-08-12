@@ -6,7 +6,7 @@ import App from "./app.js";
 import { test_scene } from "./scenes/testing_scene.js";
 
 const k = kaplay({
-  background: [39, 38, 36],
+  background: [255, 255, 255],
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
   scale: 1,
