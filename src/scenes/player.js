@@ -5,6 +5,9 @@ const JUMP_FORCE = -600;
 const SPEED = 200;
 const DRAG_ON_GROUND = 7;
 
+const HOOK_IMPULSE = 400;
+const HOOK_LEN = 120;
+
 export const spawnPlayer = () => {
   loadSprite("hero_afk", "./sprites/hero-afk.png", {
     sliceX: 8,
@@ -26,10 +29,11 @@ export const spawnPlayer = () => {
   ]);
 
   player.play("idle");
-  console.log(getSprite("hero_afk"));
 
+  // Player variables
   player.lastDirection = Vec2.fromAngle(-45);
 
+  // Player movement
   onKeyDown("left", () => {
     player.flipX = true;
     player.move(-SPEED, 0);
@@ -56,12 +60,8 @@ export const spawnPlayer = () => {
     player.applyImpulse(vec2(-IMPULSE_FORCE, 0));
   });
 
+  // Physics
   player.onUpdate(() => {
-    if (player.vel.x >= 1 || player.vel.x <= -1) {
-      player.lastDirection = player.vel.x;
-      console.log(player.lastDirection);
-    }
-
     if (player.isGrounded()) {
       player.drag = DRAG_ON_GROUND;
     } else {
@@ -69,7 +69,6 @@ export const spawnPlayer = () => {
     }
   });
 
-  // wall
   player.onCollide("solid", () => {
     console.log("collide!");
     shake(5);
@@ -78,7 +77,7 @@ export const spawnPlayer = () => {
 
   function hook() {
     let updateRope = false;
-    const rope = createSwingRope(vec2(0, 0), 120);
+    const rope = createSwingRope(vec2(0, 0), HOOK_LEN);
     rope.attach(player);
 
     onKeyPress("up", () => {
@@ -94,7 +93,8 @@ export const spawnPlayer = () => {
       if (updateRope != true) return;
 
       updateRope = false;
-      let newDir = player.vel.unit().scale(400);
+      let newDir = Vec2.fromAngle(-45).scale(HOOK_IMPULSE);
+      newDir.x = newDir.x * player.lastDirection;
       console.log(newDir);
       player.applyImpulse(newDir);
     });
@@ -117,23 +117,10 @@ export const spawnPlayer = () => {
     player.lastDirection > 0
       ? (direction.x = direction.x)
       : (direction.x = -direction.x);
-    let hit = raycast(player.pos, direction.scale(400), ["player"]);
+    let hit = raycast(player.pos, direction.scale(HOOK_LEN), ["player"]);
 
     if (hit) {
       return hit.point;
-
-      drawCircle({
-        pos: pos,
-        radius: 16,
-        color: BLUE,
-      });
-
-      drawLine({
-        p1: player.pos,
-        p2: hitPos,
-        width: 2,
-        color: BLUE,
-      });
     }
 
     return null;
@@ -143,47 +130,3 @@ export const spawnPlayer = () => {
 
   return player;
 };
-
-// onKeyPress("c", () => {
-//     const hookDistance = 200;
-//     const hookAngle = -60;
-
-//     const hook = player.add([
-//       rect(10, 10),
-//       pos(player.renderArea().center()),
-//       rotate(hookAngle),
-//       timer(),
-//       animate(),
-//     ]);
-
-//     const hit = raycast(player.center, Vec2.fromAngle(hookAngle).scale(400), [
-//       "player",
-//     ]);
-
-//     if (hit) {
-//       const poz = hit.point;
-
-//       drawCircle({
-//         pos: poz,
-//         radius: 1,
-//         color: [255, 0, 0],
-//       });
-
-//       drawLine({
-//         p1: player.pos,
-//         p2: poz.add(hit.normal.scale(25)),
-//         width: 1,
-//         color: BLUE,
-//       });
-//     }
-
-//     hook.animate("width", [hook.width, (hook.width = hookDistance)], {
-//       loops: 1,
-//       duration: 0.1,
-//       direction: "forward",
-//     });
-
-//     hook.wait(1, () => {
-//       destroy(hook);
-//     });
-//   });

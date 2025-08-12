@@ -19,11 +19,15 @@ export function createSwingRope(anchor, radius) {
   }
 
   onCollide("player", "solid", () => {
-    angularVelocity = -angularVelocity * 2;
+    angularVelocity = -angularVelocity * 1;
   });
 
   function update(dt) {
     if (!player) return;
+
+    angularVelocity > 3;
+    player.vel.x > 3 ? (player.vel.x = 3) : (player.vel.x = player.vel.x);
+    player.vel.y > 3 ? (player.vel.x = 3) : (player.vel.y = player.vel.y);
 
     const frameFactor = dt() * 60;
 

@@ -4,18 +4,24 @@ export const test_scene = () => {
   let player = spawnPlayer();
 
   add([
-    rect(width(), 20),
+    rect(width() / 3, 20),
     pos(0, height() - 20),
     area(),
     body({ isStatic: true }),
   ]);
 
   add([
-    rect(width() / 2, 20),
-    pos(width() / 4, height() - 300),
+    rect(width() / 3, 20),
+    pos((width() / 3) * 2, height() - 20),
     area(),
     body({ isStatic: true }),
-    "solid",
+  ]);
+
+  add([
+    rect(width() / 2, 20),
+    pos(width() / 4, height() - 200),
+    area(),
+    body({ isStatic: true }),
   ]);
 
   add([
