@@ -53,11 +53,7 @@ export const spawnPlayer = () => {
   });
 
   onKeyPress("x", () => {
-    player.applyImpulse(vec2(IMPULSE_FORCE, 0));
-  });
-
-  onKeyPress("z", () => {
-    player.applyImpulse(vec2(-IMPULSE_FORCE, 0));
+    player.applyImpulse(vec2(IMPULSE_FORCE * player.lastDirection, 0));
   });
 
   // Physics
@@ -70,8 +66,7 @@ export const spawnPlayer = () => {
   });
 
   player.onCollide("solid", () => {
-    console.log("collide!");
-    shake(5);
+    if (player.vel.x > 2 || player.vel.x < -2) shake(5);
     player.vel = vec2(player.vel.x * -1, player.vel.y);
   });
 
@@ -80,32 +75,31 @@ export const spawnPlayer = () => {
     const rope = createSwingRope(vec2(0, 0), HOOK_LEN);
     rope.attach(player);
 
-    onKeyPress("up", () => {
-      const ropePivot = calcPoint();
-      if (ropePivot == null) {
+    onKeyPress("z", () => {
+      if (updateRope == false) {
+        const hit = getNewHookPoint();
+        if (hit == null) {
+          return;
+        }
+
+        rope.setAnchor(hit);
+
+        const hook_len = hit.sub(player.pos).len();
+        if (hook_len < HOOK_LEN) {
+          rope.setRadius(hook_len);
+        } else {
+          rope.setRadius(HOOK_LEN);
+        }
+
+        updateRope = true;
         return;
       }
-
-      rope.setAnchor(ropePivot);
-
-      const dist = ropePivot.sub(player.pos).len();
-      if (dist < HOOK_LEN) {
-        rope.setRadius(dist);
-      } else {
-        rope.setRadius(HOOK_LEN);
-      }
-
-      console.log(rope.radius);
-
-      updateRope = true;
-    });
-    onKeyPress("down", () => {
-      if (updateRope != true) return;
 
       updateRope = false;
       let newDir = Vec2.fromAngle(-45).scale(HOOK_IMPULSE);
       newDir.x = newDir.x * player.lastDirection;
       player.applyImpulse(newDir);
+      return;
     });
 
     onUpdate(() => {
@@ -121,7 +115,7 @@ export const spawnPlayer = () => {
     });
   }
 
-  const calcPoint = () => {
+  const getNewHookPoint = () => {
     let direction = Vec2.fromAngle(-45);
     player.lastDirection > 0
       ? (direction.x = direction.x)
