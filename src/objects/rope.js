@@ -1,3 +1,5 @@
+import { COLORS } from "../config";
+
 export function createSwingRope(anchor, radius) {
   let angle = Math.PI / 2; // 90° вниз
   let angularVelocity = 0;
@@ -51,7 +53,7 @@ export function createSwingRope(anchor, radius) {
       p1: anchor,
       p2: player.pos,
       width: 2,
-      color: [0, 0, 0],
+      color: rgb(COLORS.foreground),
     });
   }
 

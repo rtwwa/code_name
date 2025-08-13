@@ -1,14 +1,30 @@
+import { COLORS } from "../config";
 import { spawnPlayer } from "../objects/player/player";
 
 export const test_scene = () => {
-  let player = spawnPlayer(vec2(width() / 6 + 50, height() - 200));
+  const PLAYER_START_POS = vec2(width() / 6 + 50, height() - 200);
+
+  let player = spawnPlayer(PLAYER_START_POS);
+
+  add([
+    rect(width() * 1.5, height() * 1.5),
+    pos(-100, -100),
+    area(),
+    opacity(0),
+    "aliveZone",
+  ]);
+
+  player.onCollideEnd("aliveZone", () => {
+    player.vel = Vec2.ZERO;
+    player.pos = PLAYER_START_POS;
+  });
 
   add([
     rect(width() / 3, 20),
     pos(0, height() - 20),
     area(),
     body({ isStatic: true }),
-    color(0, 0, 0),
+    color(COLORS.foreground),
     "solid",
   ]);
 
@@ -17,7 +33,7 @@ export const test_scene = () => {
     pos((width() / 3) * 2, height() - 20),
     area(),
     body({ isStatic: true }),
-    color(0, 0, 0),
+    color(COLORS.foreground),
     "solid",
   ]);
 
@@ -26,7 +42,7 @@ export const test_scene = () => {
     pos(width() / 6, height() - 200),
     area(),
     body({ isStatic: true }),
-    color(0, 0, 0),
+    color(COLORS.foreground),
     "solid",
   ]);
 
@@ -35,7 +51,7 @@ export const test_scene = () => {
     pos(width() - 20, 0),
     area(),
     body({ isStatic: true }),
-    color(0, 0, 0),
+    color(COLORS.foreground),
     "solid",
   ]);
 
@@ -44,7 +60,7 @@ export const test_scene = () => {
     pos(0, 0),
     area(),
     body({ isStatic: true }),
-    color(0, 0, 0),
+    color(COLORS.foreground),
     "solid",
   ]);
 
@@ -53,7 +69,7 @@ export const test_scene = () => {
     pos(width() / 2, height() * -0.355),
     area(),
     body({ isStatic: true }),
-    color(0, 0, 0),
+    color(COLORS.foreground),
     "solid",
   ]);
 
@@ -62,7 +78,7 @@ export const test_scene = () => {
     pos(width() * 0.66, height() * 0.75),
     area(),
     body({ isStatic: true }),
-    color(0, 0, 0),
+    color(COLORS.foreground),
     "solid",
   ]);
 

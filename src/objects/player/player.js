@@ -1,3 +1,4 @@
+import { COLORS } from "../../config";
 import { initAttachAbility } from "./abilities/attach";
 import { initDashAbility } from "./abilities/dash";
 import { initHookAbility } from "./abilities/hook";
@@ -6,6 +7,7 @@ import { createFootstepEmitter } from "./particles";
 const JUMP_FORCE = -600;
 const SPEED = 200;
 const DRAG_ON_GROUND = 7;
+const HERO_COLOR = COLORS.foreground;
 
 export const spawnPlayer = (position) => {
   loadSprite("hero", "./sprites/all.png", {
@@ -18,13 +20,35 @@ export const spawnPlayer = (position) => {
     },
   });
 
+  loadShader(
+    "tint",
+    null,
+    `
+    precision mediump float;
+
+    uniform float r;
+    uniform float g;
+    uniform float b;
+
+    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+        vec4 c = def_frag();
+
+        return vec4(r,g,b,c.a);
+    }
+    `
+  );
+
   const player = add([
     sprite("hero"),
     pos(position),
     area(),
     body(),
     anchor("center"),
-    color(0, 0, 0),
+    shader("tint", () => ({
+      r: HERO_COLOR.at(0) / 255,
+      g: HERO_COLOR.at(1) / 255,
+      b: HERO_COLOR.at(2) / 255,
+    })),
     "player",
   ]);
 
