@@ -15,7 +15,7 @@ const k = kaplay({
 
 fullscreenHandler(k);
 
-loadFont("Tiny", "/fonts/Tiny5-Regular.ttf");
+loadFont("Tiny", "./fonts/Tiny5-Regular.ttf");
 
 App.init(k);
 
