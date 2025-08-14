@@ -1,27 +1,29 @@
-const IMPULSE_FORCE = 500;
+const IMPULSE_FORCE = 700;
+const DASH_COOLDOWN = 1.5;
 
 export function initDashAbility(player) {
+  const dashAbility = add([timer()]);
   let hasDashed = false;
 
-  const useDash = () => {
+  dashAbility.useDash = () => {
     if (hasDashed == true) return;
 
     hasDashed = true;
-    player.applyImpulse(vec2(IMPULSE_FORCE * player.lastDirection, 0));
-  };
-
-  player.onUpdate(() => {
-    if (player.isGrounded()) {
+    dashAbility.wait(DASH_COOLDOWN, () => {
       hasDashed = false;
-    }
-  });
+    });
+
+    player.applyImpulse(
+      vec2(
+        IMPULSE_FORCE * player.lastDirection.x,
+        IMPULSE_FORCE * player.lastDirection.y
+      )
+    );
+  };
 
   onKeyPress("x", () => {
-    useDash(player);
+    dashAbility.useDash(player);
   });
 
-  return {
-    hasDashed,
-    useDash,
-  };
+  return dashAbility;
 }

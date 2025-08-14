@@ -1,86 +1,44 @@
 import { COLORS } from "../config";
+import { setupBulletLogic, spawnTurretAR } from "../objects/enemies/turretAR";
 import { spawnPlayer } from "../objects/player/player";
 
-export const test_scene = () => {
+export const test_scene = async () => {
   const PLAYER_START_POS = vec2(width() / 6 + 50, height() - 200);
 
-  let player = spawnPlayer(PLAYER_START_POS);
+  const player = await spawnPlayer(PLAYER_START_POS);
+
+  const centerPos = vec2(width() / 2, height() / 2);
+  const radius = width() / 2 - 16;
+  const halfRadiusPlayerModel = 36;
 
   add([
-    rect(width() * 1.5, height() * 1.5),
-    pos(-100, -100),
-    area(),
-    opacity(0),
-    "aliveZone",
+    pos(centerPos),
+    circle(radius, { fill: false }),
+    outline(2, Color.fromArray(COLORS.foreground)),
   ]);
 
-  player.onCollideEnd("aliveZone", () => {
-    player.vel = Vec2.ZERO;
-    player.pos = PLAYER_START_POS;
+  player.onUpdate(() => {
+    const distFromCenter = player.pos.dist(centerPos);
+    if (distFromCenter > radius - halfRadiusPlayerModel) {
+      const dir = player.pos.sub(centerPos).unit();
+      player.pos = centerPos.add(dir.scale(radius - halfRadiusPlayerModel));
+    }
   });
 
-  add([
-    rect(width() / 3, 20),
-    pos(0, height() - 20),
-    area(),
-    body({ isStatic: true }),
-    color(COLORS.foreground),
-    "solid",
+  const scoreText = add([
+    text("x -> dash", { font: "Tiny" }),
+    pos(20, 20),
+    layer("ui"),
   ]);
 
-  add([
-    rect(width() / 3, 20),
-    pos((width() / 3) * 2, height() - 20),
-    area(),
-    body({ isStatic: true }),
-    color(COLORS.foreground),
-    "solid",
-  ]);
+  setupBulletLogic((bullet) => {
+    const distFromCenter = bullet.pos.dist(centerPos);
+    if (distFromCenter > radius - bullet.radius / 2) {
+      destroy(bullet);
+    }
+  });
 
-  add([
-    rect(width() / 3, 20),
-    pos(width() / 6, height() - 200),
-    area(),
-    body({ isStatic: true }),
-    color(COLORS.foreground),
-    "solid",
-  ]);
-
-  add([
-    rect(20, height() - 20),
-    pos(width() - 20, 0),
-    area(),
-    body({ isStatic: true }),
-    color(COLORS.foreground),
-    "solid",
-  ]);
-
-  add([
-    rect(20, height() - 20),
-    pos(0, 0),
-    area(),
-    body({ isStatic: true }),
-    color(COLORS.foreground),
-    "solid",
-  ]);
-
-  add([
-    rect(20, height() - 20),
-    pos(width() / 2, height() * -0.355),
-    area(),
-    body({ isStatic: true }),
-    color(COLORS.foreground),
-    "solid",
-  ]);
-
-  add([
-    rect(20, height() - 20),
-    pos(width() * 0.66, height() * 0.75),
-    area(),
-    body({ isStatic: true }),
-    color(COLORS.foreground),
-    "solid",
-  ]);
-
-  setGravity(1600);
+  // спавним туррель
+  spawnTurretAR(vec2(center().x, 150));
+  spawnTurretAR(vec2(center().x, 200), { bulletCount: 24, bulletSpeed: 200 });
 };

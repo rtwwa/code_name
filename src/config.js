@@ -1,5 +1,5 @@
-export const GAME_WIDTH = 800;
-export const GAME_HEIGHT = 450;
+export const GAME_WIDTH = 640;
+export const GAME_HEIGHT = 640;
 
 // 16:9
 
