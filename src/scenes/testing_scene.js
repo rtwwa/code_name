@@ -3,7 +3,7 @@ import { setupBulletLogic, spawnTurretAR } from "../objects/enemies/turretAR";
 import { spawnPlayer } from "../objects/player/player";
 
 export const test_scene = async () => {
-  const PLAYER_START_POS = vec2(width() / 6 + 50, height() - 200);
+  const PLAYER_START_POS = vec2(center().x, center().y * 1.7);
 
   const player = await spawnPlayer(PLAYER_START_POS);
 

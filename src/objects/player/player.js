@@ -1,3 +1,4 @@
+import App from "../../app";
 import { COLORS } from "../../config";
 import { initAttachAbility } from "./abilities/attach";
 import { initDashAbility } from "./abilities/dash";
@@ -167,6 +168,11 @@ export const spawnPlayer = async (position) => {
 
       player.play("afk");
     }
+  });
+
+  // Death
+  player.onDeath(() => {
+    App.startScene("death");
   });
 
   return player;
