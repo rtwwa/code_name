@@ -1,5 +1,5 @@
 import App from "../../app";
-import { COLORS } from "../../config";
+import { COLORS, DEF_COLORS, setForegroundColor } from "../../config";
 import { initAttachAbility } from "./abilities/attach";
 import { initDashAbility } from "./abilities/dash";
 import { initHookAbility } from "./abilities/hook";
@@ -71,12 +71,11 @@ export const spawnPlayer = async (position) => {
 
   const playerSprite = await getSprite("hero");
 
-  console.log(playerSprite);
-
   const player = add([
     sprite(playerSprite),
     health(MAX_HEALTH, MAX_HEALTH),
     pos(position),
+    color(COLORS.foreground),
     area({
       shape: new Polygon([
         vec2(-18, 12),
@@ -87,16 +86,15 @@ export const spawnPlayer = async (position) => {
     }),
     body(),
     anchor(vec2(0.2, 0.5)),
+    timer(),
     "player",
   ]);
 
-  console.log(player.hp());
-
   player.use(
     shader("tint", () => ({
-      r: HERO_COLOR.at(0) / 255,
-      g: HERO_COLOR.at(1) / 255,
-      b: HERO_COLOR.at(2) / 255,
+      r: player.color.r / 255,
+      g: player.color.g / 255,
+      b: player.color.b / 255,
       h: 596 + (1 - player.hp() / player.maxHP()) * 1452,
       texSize: vec2(playerSprite.tex.width, playerSprite.tex.height),
       frameOffset: vec2(
@@ -168,6 +166,17 @@ export const spawnPlayer = async (position) => {
 
       player.play("afk");
     }
+  });
+
+  // Damage
+  player.onHurt(() => {
+    if (player.hp() <= 0) return;
+
+    setForegroundColor([255, 0, 0]);
+
+    player.wait(0.3, () => {
+      setForegroundColor(DEF_COLORS.foreground);
+    });
   });
 
   // Death

@@ -30,9 +30,9 @@ export function spawnTurretAR(position, options = {}) {
       const dir = vec2(Math.cos(angle), Math.sin(angle));
 
       add([
-        circle(8),
+        circle(6),
         pos(turret.pos),
-        color(...bulletColor),
+        color(COLORS.foreground),
         area(),
         "bullet",
         { dir, speed: turret.bulletSpeed, damage: turret.damage },

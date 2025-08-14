@@ -1,5 +1,6 @@
 import { COLORS } from "../config";
 import { setupBulletLogic, spawnTurretAR } from "../objects/enemies/turretAR";
+import { createCursor, setupCursorLogic } from "../objects/mouse";
 import { spawnPlayer } from "../objects/player/player";
 
 export const test_scene = async () => {
@@ -15,6 +16,7 @@ export const test_scene = async () => {
     pos(centerPos),
     circle(radius, { fill: false }),
     outline(2, Color.fromArray(COLORS.foreground)),
+    "border",
   ]);
 
   player.onUpdate(() => {
@@ -29,6 +31,7 @@ export const test_scene = async () => {
     text("x -> dash", { font: "Tiny" }),
     pos(20, 20),
     layer("ui"),
+    color(COLORS.foreground),
   ]);
 
   setupBulletLogic((bullet) => {
@@ -41,4 +44,8 @@ export const test_scene = async () => {
   // спавним туррель
   spawnTurretAR(vec2(center().x, 150));
   spawnTurretAR(vec2(center().x, 200), { bulletCount: 24, bulletSpeed: 200 });
+
+  await createCursor();
+  setupCursorLogic();
+  setCursor("none");
 };

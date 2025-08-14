@@ -16,6 +16,7 @@ export const death_scene = async (nextScene) => {
       font: "Tiny",
       align: "center",
     }),
+    color(COLORS.foreground),
     pos(center()),
     anchor("center"),
     layer("ui"),

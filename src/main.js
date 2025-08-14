@@ -5,6 +5,7 @@ import { GAME_WIDTH, GAME_HEIGHT, COLORS } from "./config.js";
 import App from "./app.js";
 import { test_scene } from "./scenes/testing_scene.js";
 import { death_scene } from "./scenes/death.scene.js";
+import { createCursor, setupCursorLogic } from "./objects/mouse.js";
 
 const k = kaplay({
   background: [COLORS.background],
