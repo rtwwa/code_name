@@ -11,11 +11,13 @@ export const GAME_HEIGHT = 800;
 export const DEF_COLORS = {
   background: [34, 42, 61],
   foreground: [237, 242, 226],
+  debug: [255, 0, 0],
 };
 
 export const COLORS = {
   background: [34, 42, 61],
   foreground: [237, 242, 226],
+  debug: [255, 0, 0],
 };
 
 export function setForegroundColor(newColor) {

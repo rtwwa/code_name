@@ -1,12 +1,15 @@
 import { COLORS } from "../../config";
 
+export async function loadTurret() {
+  await loadSprite("turret", "./sprites/turret.png");
+}
+
 export function spawnTurretAR(position, options = {}) {
   const {
     bulletCount = 12,
     bulletSpeed = 150,
     damage = 1,
     shootInterval = 2,
-    bulletColor = [COLORS.foreground],
     size = 24,
   } = options;
 
@@ -55,8 +58,6 @@ export function setupBulletLogic(destroyBulletFunc) {
   });
 
   onCollide("bullet", "player", (bullet, player) => {
-    shake(4);
-
     destroy(bullet);
     player.hurt(bullet.damage);
   });

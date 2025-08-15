@@ -1,17 +1,15 @@
 import App from "../../app";
 import { COLORS, DEF_COLORS, setForegroundColor } from "../../config";
-import { initAttachAbility } from "./abilities/attach";
-import { initDashAbility } from "./abilities/dash";
+import { initAttackAbility } from "./abilities/attack";
 import { initHookAbility } from "./abilities/hook";
 import { createFootstepEmitter } from "./particles";
 
 const MAX_HEALTH = 5;
 const SPEED = 250;
-const DRAG = 7;
 const INV_AFTER_HURT = 0.3;
 
 export const spawnPlayer = async (position) => {
-  let frames = vec2(12, 2);
+  let frames = vec2(8, 3);
   let canTakeDamage = true;
 
   loadSprite("hero", "./sprites/all.png", {
@@ -20,7 +18,7 @@ export const spawnPlayer = async (position) => {
     anims: {
       afk: 0,
       idle: { from: 0, to: 7, loop: true },
-      walk: { from: 12, to: 23, loop: true },
+      walk: { from: 8, to: 14, loop: true },
     },
   });
 
@@ -42,6 +40,12 @@ export const spawnPlayer = async (position) => {
     body(),
     anchor(vec2(0.2, 0.5)),
     timer(),
+    {
+      maxHeath: MAX_HEALTH,
+      health: MAX_HEALTH,
+      speed: SPEED,
+      invAfterHurt: INV_AFTER_HURT,
+    },
     "player",
   ]);
 
@@ -63,16 +67,19 @@ export const spawnPlayer = async (position) => {
     }))
   );
 
+  // TODO: for testing, delete it later
   onKeyPress("space", () => {
-    player.hurt(1);
-    console.log(player.maxHP(), player.hp() / player.maxHP());
+    let allBullet = get("bullet");
+
+    allBullet.map((obj) => {
+      console.log(obj.radius);
+      obj.radius = obj.radius * 3;
+    });
   });
 
   // Player variables
-  player.drag = DRAG;
   player.canMove = true;
   player.isMoving = false;
-  player.lastDirection = vec2(1, 1);
 
   // Player movement
   const keyMap = {
@@ -119,7 +126,7 @@ export const spawnPlayer = async (position) => {
   };
 
   // Abilities
-  const dashAbility = initDashAbility(player);
+  const attackAbility = initAttackAbility(player);
   // const attachAbility = initAttachAbility(player, JUMP_FORCE);
   // const hookAbility = initHookAbility(player);
 
@@ -150,19 +157,30 @@ export const spawnPlayer = async (position) => {
   player.hurt = (amount) => {
     if (!canTakeDamage) return;
 
-    canTakeDamage = false;
-    player.wait(INV_AFTER_HURT, () => {
-      canTakeDamage = true;
-    });
+    player.setInvTime(INV_AFTER_HURT);
 
     player.setHP(player.hp() - amount);
     player.trigger("hurt");
   };
 
-  player.onHurt((damage) => {
+  player.setInvTime = (seconds) => {
+    canTakeDamage = false;
+    player.wait(seconds, () => {
+      canTakeDamage = true;
+    });
+  };
+
+  player.setInv = (bool) => {
+    canTakeDamage = bool;
+    console.log(canTakeDamage);
+  };
+
+  player.onHurt(() => {
     if (player.hp() <= 0) return;
 
-    setForegroundColor([255, 0, 0]);
+    shake(4);
+
+    setForegroundColor([156, 23, 59]);
 
     player.wait(0.3, () => {
       setForegroundColor(DEF_COLORS.foreground);
