@@ -5,7 +5,7 @@ import { initHookAbility } from "./abilities/hook";
 import { createFootstepEmitter } from "./particles";
 
 const MAX_HEALTH = 5;
-const SPEED = 250;
+const SPEED = 300;
 const INV_AFTER_HURT = 0.3;
 
 export const spawnPlayer = async (position) => {

@@ -5,6 +5,7 @@ import {
   setupBulletLogic,
   spawnTurretAR,
 } from "../objects/enemies/turretAR";
+import { createGameManager } from "../objects/gameManager";
 import Cursor from "../objects/mouse";
 import { spawnPlayer } from "../objects/player/player";
 
@@ -33,13 +34,6 @@ export const test_scene = async () => {
     }
   });
 
-  const scoreText = add([
-    text("try space", { font: "Tiny" }),
-    pos(20, 20),
-    layer("ui"),
-    color(COLORS.foreground),
-  ]);
-
   setupBulletLogic((bullet) => {
     const distFromCenter = bullet.pos.dist(centerPos);
     if (distFromCenter > radius - bullet.radius) {
@@ -48,9 +42,21 @@ export const test_scene = async () => {
   });
 
   await loadTurret();
-  spawnTurretAR(vec2(center().x, 150));
-  spawnTurretAR(vec2(center().x, 200), { bulletCount: 24, bulletSpeed: 200 });
+  // spawnTurretAR(vec2(center().x, 150));
+  // spawnTurretAR(vec2(center().x, 200), { bulletCount: 24, bulletSpeed: 200 });
 
   setupSpiderLogic();
-  spawnSpider(center(), centerPos, radius);
+  // spawnSpider(center(), centerPos, radius);
+  const gameManager = createGameManager(player, centerPos, radius);
+
+  const scoreText = add([
+    text(get("gameManager")[0].score, { font: "Tiny" }),
+    pos(20, 20),
+    layer("ui"),
+    color(COLORS.foreground),
+  ]);
+
+  gameManager.onScoreChange(() => {
+    scoreText.text = gameManager.score;
+  });
 };
