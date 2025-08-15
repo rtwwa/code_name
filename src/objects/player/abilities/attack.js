@@ -43,7 +43,6 @@ export async function initAttackAbility(player) {
   };
 
   onMousePress("left", () => {
-    console.log(attackAbility);
     attackAbility.Attack();
   });
 
@@ -63,7 +62,6 @@ export async function initAttackAbility(player) {
 
             obj.target.hurt();
 
-            console.log(obj.target.hp());
             return;
           }
         });

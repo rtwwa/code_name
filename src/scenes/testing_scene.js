@@ -1,6 +1,10 @@
 import { COLORS } from "../config";
 import { setupSpiderLogic, spawnSpider } from "../objects/enemies/spider";
-import { setupBulletLogic, spawnTurretAR } from "../objects/enemies/turretAR";
+import {
+  loadTurret,
+  setupBulletLogic,
+  spawnTurretAR,
+} from "../objects/enemies/turretAR";
 import Cursor from "../objects/mouse";
 import { spawnPlayer } from "../objects/player/player";
 
@@ -43,6 +47,7 @@ export const test_scene = async () => {
     }
   });
 
+  await loadTurret();
   spawnTurretAR(vec2(center().x, 150));
   spawnTurretAR(vec2(center().x, 200), { bulletCount: 24, bulletSpeed: 200 });
 

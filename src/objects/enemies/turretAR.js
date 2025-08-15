@@ -1,7 +1,8 @@
 import { COLORS } from "../../config";
 
 export async function loadTurret() {
-  await loadSprite("turret", "./sprites/turret.png");
+  // await loadSprite("turret", "./sprites/turret.png");
+  await loadSprite("deathParticlies", "./sprites/dust.png");
 }
 
 export function spawnTurretAR(position, options = {}) {
@@ -16,6 +17,8 @@ export function spawnTurretAR(position, options = {}) {
   const turret = add([
     rect(size, size),
     pos(position),
+    area(),
+    health(1),
     color(COLORS.foreground),
     anchor("center"),
     "enemy",
@@ -25,6 +28,25 @@ export function spawnTurretAR(position, options = {}) {
       damage,
       shootInterval,
     },
+  ]);
+
+  let pE = turret.add([
+    pos(center()),
+    particles(
+      {
+        max: 100,
+        speed: [75, 100],
+        lifeTime: [0.75, 1.0],
+        angle: [0, 360],
+        opacities: [1.0, 0.0],
+        texture: getSprite("deathParticlies").tex,
+        quads: getSprite("deathParticlies").frames,
+      },
+      {
+        direction: 0,
+        spread: 360,
+      }
+    ),
   ]);
 
   function shootCircle() {
@@ -43,8 +65,14 @@ export function spawnTurretAR(position, options = {}) {
     }
   }
 
-  loop(turret.shootInterval, () => {
+  const timer = loop(turret.shootInterval, () => {
     shootCircle();
+  });
+
+  turret.onDeath(() => {
+    console.log(pE);
+    timer.cancel();
+    destroy(turret);
   });
 
   return turret;

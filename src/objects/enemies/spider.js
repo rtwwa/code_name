@@ -90,10 +90,6 @@ export function spawnSpider(position, centerPos, radius, options = {}) {
 
 export function setupSpiderLogic() {
   onCollide("spider", "player", (spider, player) => {
-    shake(4);
-
-    console.log(spider);
-
     player.hurt(spider.damage);
   });
 }

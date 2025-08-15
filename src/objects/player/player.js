@@ -72,7 +72,6 @@ export const spawnPlayer = async (position) => {
     let allBullet = get("bullet");
 
     allBullet.map((obj) => {
-      console.log(obj.radius);
       obj.radius = obj.radius * 3;
     });
   });
@@ -172,7 +171,6 @@ export const spawnPlayer = async (position) => {
 
   player.setInv = (bool) => {
     canTakeDamage = bool;
-    console.log(canTakeDamage);
   };
 
   player.onHurt(() => {
