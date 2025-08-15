@@ -1,3 +1,5 @@
+import Cursor from "../../mouse";
+
 const IMPULSE_FORCE = 700;
 const DASH_COOLDOWN = 1.5;
 
@@ -13,15 +15,14 @@ export function initDashAbility(player) {
       hasDashed = false;
     });
 
-    player.applyImpulse(
-      vec2(
-        IMPULSE_FORCE * player.lastDirection.x,
-        IMPULSE_FORCE * player.lastDirection.y
-      )
-    );
+    const playerPos = player.pos;
+    const mousePos = Cursor.getCursorPos();
+    const dir = mousePos.sub(playerPos).unit();
+
+    player.applyImpulse(vec2(IMPULSE_FORCE * dir.x, IMPULSE_FORCE * dir.y));
   };
 
-  onKeyPress("x", () => {
+  onMousePress("left", () => {
     dashAbility.useDash(player);
   });
 

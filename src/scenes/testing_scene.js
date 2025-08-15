@@ -1,12 +1,13 @@
 import { COLORS } from "../config";
 import { setupBulletLogic, spawnTurretAR } from "../objects/enemies/turretAR";
-import { createCursor, setupCursorLogic } from "../objects/mouse";
+import Cursor from "../objects/mouse";
 import { spawnPlayer } from "../objects/player/player";
 
 export const test_scene = async () => {
   const PLAYER_START_POS = vec2(center().x, center().y * 1.7);
 
   const player = await spawnPlayer(PLAYER_START_POS);
+  await Cursor.init();
 
   const centerPos = vec2(width() / 2, height() / 2);
   const radius = width() / 2 - 16;
@@ -27,12 +28,12 @@ export const test_scene = async () => {
     }
   });
 
-  const scoreText = add([
-    text("x -> dash", { font: "Tiny" }),
-    pos(20, 20),
-    layer("ui"),
-    color(COLORS.foreground),
-  ]);
+  // const scoreText = add([
+  //   text("x -> dash", { font: "Tiny" }),
+  //   pos(20, 20),
+  //   layer("ui"),
+  //   color(COLORS.foreground),
+  // ]);
 
   setupBulletLogic((bullet) => {
     const distFromCenter = bullet.pos.dist(centerPos);
@@ -44,8 +45,4 @@ export const test_scene = async () => {
   // спавним туррель
   spawnTurretAR(vec2(center().x, 150));
   spawnTurretAR(vec2(center().x, 200), { bulletCount: 24, bulletSpeed: 200 });
-
-  await createCursor();
-  setupCursorLogic();
-  setCursor("none");
 };

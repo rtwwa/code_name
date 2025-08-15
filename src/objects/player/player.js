@@ -7,11 +7,12 @@ import { createFootstepEmitter } from "./particles";
 
 const MAX_HEALTH = 5;
 const SPEED = 250;
-const HERO_COLOR = COLORS.foreground;
 const DRAG = 7;
+const INV_AFTER_HURT = 0.3;
 
 export const spawnPlayer = async (position) => {
   let frames = vec2(12, 2);
+  let canTakeDamage = true;
 
   loadSprite("hero", "./sprites/all.png", {
     sliceX: frames.x,
@@ -22,52 +23,6 @@ export const spawnPlayer = async (position) => {
       walk: { from: 12, to: 23, loop: true },
     },
   });
-
-  loadShader(
-    "tint",
-    null,
-    `
-  precision mediump float;
-
-  uniform float r;
-  uniform float g;
-  uniform float b;
-  uniform float h;
-  uniform vec2 texSize;
-  uniform vec2 frameOffset;
-  uniform vec2 frameSize;
-
-  vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
-      vec4 c = texture2D(tex, uv);
-
-      if (c.a < 0.01) {
-          return c;
-      }
-
-      vec2 offsetX = vec2(1.0 / texSize.x, 0.0);
-      vec2 offsetY = vec2(0.0, 1.0 / texSize.y);
-
-      float alphaUp    = texture2D(tex, uv + offsetY).a;
-      float alphaDown  = texture2D(tex, uv - offsetY).a;
-      float alphaLeft  = texture2D(tex, uv - offsetX).a;
-      float alphaRight = texture2D(tex, uv + offsetX).a;
-
-      if (alphaUp < 0.01 || alphaDown < 0.01 || alphaLeft < 0.01 || alphaRight < 0.01) {
-          return vec4(r, g, b, c.a);
-      }
-
-      vec2 pixelCoord = uv * texSize;
-      vec2 localPixel = pixelCoord - (frameOffset * texSize);
-      vec2 localUV = localPixel / frameSize; // 0..1 по фрейму
-
-      if (localUV.y <= h) {
-          return vec4(1.0, 0.0, 0.0, 0.0);
-      }
-
-      return vec4(r, g, b, c.a);
-      }
-      `
-  );
 
   const playerSprite = await getSprite("hero");
 
@@ -91,7 +46,7 @@ export const spawnPlayer = async (position) => {
   ]);
 
   player.use(
-    shader("tint", () => ({
+    shader("playerShader", () => ({
       r: player.color.r / 255,
       g: player.color.g / 255,
       b: player.color.b / 255,
@@ -120,16 +75,39 @@ export const spawnPlayer = async (position) => {
   player.lastDirection = vec2(1, 1);
 
   // Player movement
+  const keyMap = {
+    KeyW: "up",
+    KeyA: "left",
+    KeyS: "down",
+    KeyD: "right",
+  };
+
+  const pressed = {};
+
+  document.addEventListener("keydown", (e) => {
+    const action = keyMap[e.code];
+    if (action) pressed[action] = true;
+  });
+
+  document.addEventListener("keyup", (e) => {
+    const action = keyMap[e.code];
+    if (action) pressed[action] = false;
+  });
+
+  function isActionDown(action) {
+    return !!pressed[action];
+  }
+
   const moveHandler = () => {
     if (!player.canMove) return;
 
     let dirX = 0;
     let dirY = 0;
 
-    if (isKeyDown("left")) dirX -= 1;
-    if (isKeyDown("right")) dirX += 1;
-    if (isKeyDown("up")) dirY -= 1;
-    if (isKeyDown("down")) dirY += 1;
+    if (isActionDown("left")) dirX -= 1;
+    if (isActionDown("right")) dirX += 1;
+    if (isActionDown("up")) dirY -= 1;
+    if (isActionDown("down")) dirY += 1;
 
     let dir = vec2(dirX, dirY);
     if (dir.len() > 0) {
@@ -150,10 +128,10 @@ export const spawnPlayer = async (position) => {
     moveHandler();
 
     if (
-      (isKeyDown("left") ||
-        isKeyDown("right") ||
-        isKeyDown("up") ||
-        isKeyDown("down")) &&
+      (isActionDown("left") ||
+        isActionDown("right") ||
+        isActionDown("up") ||
+        isActionDown("down")) &&
       player.canMove
     ) {
       player.isMoving = true;
@@ -169,7 +147,19 @@ export const spawnPlayer = async (position) => {
   });
 
   // Damage
-  player.onHurt(() => {
+  player.hurt = (amount) => {
+    if (!canTakeDamage) return;
+
+    canTakeDamage = false;
+    player.wait(INV_AFTER_HURT, () => {
+      canTakeDamage = true;
+    });
+
+    player.setHP(player.hp() - amount);
+    player.trigger("hurt");
+  };
+
+  player.onHurt((damage) => {
     if (player.hp() <= 0) return;
 
     setForegroundColor([255, 0, 0]);

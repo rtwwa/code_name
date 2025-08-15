@@ -1,23 +1,38 @@
 import { COLORS } from "../config";
 
-export const createCursor = async () => {
-  // const cursosSprite = await loadSprite("cursor", "./sprites/cursor.png");
+const Cursor = {
+  c: null,
 
-  const c = add([
-    rect(25, 25),
-    pos(center()),
-    color(COLORS.foreground),
-    anchor("center"),
-    "cursor",
-  ]);
+  async init() {
+    await loadSprite("crosshair", "./sprites/crosshair.png");
 
-  console.log(c);
+    this.c = add([
+      sprite("crosshair"),
+      pos(center()),
+      color(COLORS.foreground),
+      anchor("center"),
+      "cursor",
+    ]);
 
-  return c;
+    this.c.use(
+      shader("newTint", () => ({
+        r: COLORS.foreground.at(0) / 255,
+        g: COLORS.foreground.at(1) / 255,
+        b: COLORS.foreground.at(2) / 255,
+      }))
+    );
+
+    setCursor("none");
+
+    const self = this;
+    onUpdate("cursor", (cursorObj) => {
+      cursorObj.pos = mousePos();
+    });
+  },
+
+  getCursorPos() {
+    return this.c ? vec2(this.c.pos) : null;
+  },
 };
 
-export function setupCursorLogic() {
-  onUpdate("cursor", (c) => {
-    c.pos = mousePos();
-  });
-}
+export default Cursor;

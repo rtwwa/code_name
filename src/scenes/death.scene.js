@@ -20,10 +20,16 @@ export const death_scene = async (nextScene) => {
     pos(center()),
     anchor("center"),
     layer("ui"),
+    animate(),
   ]);
 
   onKeyPress("space", () => {
     App.startScene("test");
+  });
+
+  scoreText.animate("scale", [0, 1], {
+    duration: 0.5,
+    loops: 1,
   });
 
   return nextScene;

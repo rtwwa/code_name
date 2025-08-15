@@ -5,7 +5,7 @@ import { GAME_WIDTH, GAME_HEIGHT, COLORS } from "./config.js";
 import App from "./app.js";
 import { test_scene } from "./scenes/testing_scene.js";
 import { death_scene } from "./scenes/death.scene.js";
-import { createCursor, setupCursorLogic } from "./objects/mouse.js";
+import { initShaders } from "./utils/shaders.js";
 
 const k = kaplay({
   background: [COLORS.background],
@@ -18,6 +18,7 @@ const k = kaplay({
 fullscreenHandler(k);
 
 loadFont("Tiny", "./fonts/Tiny5-Regular.ttf");
+initShaders();
 
 App.init(k);
 
