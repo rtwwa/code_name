@@ -38,6 +38,7 @@ export async function createGameManager(player, centerPos, radius) {
     }
 
     if (enemyType === "turretAR") {
+      а;
       const spawner = get("sTurretAR")[0];
       spawner.spawn(pos, {
         bulletCount: spawner.bulletCount + manager.difficulty / 3,
@@ -123,8 +124,8 @@ export async function createGameManager(player, centerPos, radius) {
   let lastTurretBoostPoints = 0;
 
   function checkScoreTriggers(currentScore) {
-    if (currentScore - lastUpgradePoints >= 50) {
-      lastUpgradePoints += 50;
+    if (currentScore - lastUpgradePoints >= 300) {
+      lastUpgradePoints += 300;
       manager.upgrade.openUpgradeWindow(t);
       t.paused = true;
       get("enemy").map((enemy) => {
