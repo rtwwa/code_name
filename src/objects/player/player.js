@@ -2,7 +2,6 @@ import App from "../../app";
 import { COLORS, DEF_COLORS, setForegroundColor } from "../../config";
 import { initAttackAbility } from "./abilities/attack";
 import { initHookAbility } from "./abilities/hook";
-import { createFootstepEmitter } from "./particles";
 
 const MAX_HEALTH = 5;
 const SPEED = 300;
@@ -11,6 +10,7 @@ const INV_AFTER_HURT = 0.3;
 export const spawnPlayer = async (position) => {
   let frames = vec2(8, 3);
   let canTakeDamage = true;
+  let canTakeBulletDamage = true;
 
   loadSprite("hero", "./sprites/all.png", {
     sliceX: frames.x,
@@ -67,15 +67,6 @@ export const spawnPlayer = async (position) => {
     }))
   );
 
-  // TODO: for testing, delete it later
-  onKeyPress("space", () => {
-    let allBullet = get("bullet");
-
-    allBullet.map((obj) => {
-      obj.radius = obj.radius * 3;
-    });
-  });
-
   // Player variables
   player.canMove = true;
   player.isMoving = false;
@@ -119,15 +110,15 @@ export const spawnPlayer = async (position) => {
     if (dir.len() > 0) {
       dir = dir.unit();
       player.lastDirection = dir;
-      player.move(dir.x * SPEED, dir.y * SPEED);
+      player.move(dir.x * player.speed, dir.y * player.speed);
       player.flipX = dir.x < 0;
     }
   };
 
   // Abilities
-  const attackAbility = initAttackAbility(player);
+  player.attackAbility = initAttackAbility(player);
+  player.hookAbility = initHookAbility(player);
   // const attachAbility = initAttachAbility(player, JUMP_FORCE);
-  // const hookAbility = initHookAbility(player);
 
   // Physics
   player.onUpdate(() => {
@@ -170,7 +161,18 @@ export const spawnPlayer = async (position) => {
   };
 
   player.setInv = (bool) => {
-    canTakeDamage = bool;
+    canTakeDamage = !bool;
+  };
+
+  player.setInvBulletTime = (seconds) => {
+    canTakeBulletDamage = false;
+    player.wait(seconds, () => {
+      canTakeBulletDamage = true;
+    });
+  };
+
+  player.setInvBullet = (bool) => {
+    canTakeBulletDamage = !bool;
   };
 
   player.onHurt(() => {
@@ -188,6 +190,15 @@ export const spawnPlayer = async (position) => {
   // Death
   player.onDeath(() => {
     App.startScene("death");
+  });
+
+  // TODO: for testing, delete it later
+  onKeyPress("space", async () => {
+    let allBullet = get("bullet");
+
+    allBullet.map((obj) => {
+      obj.radius = obj.radius * 3;
+    });
   });
 
   return player;

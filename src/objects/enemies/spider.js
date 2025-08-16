@@ -1,5 +1,9 @@
 import { COLORS } from "../../config";
 
+export async function loadSpider() {
+  await loadSprite("spider", "./sprites/spider.png");
+}
+
 export const SPIDER_STATS = {
   size: 10,
   speed: 200,
@@ -33,7 +37,7 @@ export function spawnSpider(position, centerPos, radius, options = {}) {
   let dist = position;
 
   const spider = add([
-    circle(size),
+    sprite("spider"),
     pos(position),
     color(COLORS.foreground),
     area(),
@@ -53,8 +57,6 @@ export function spawnSpider(position, centerPos, radius, options = {}) {
     const player = get("player")[0];
     if (player) {
       const distance = spider.pos.dist(player.pos);
-
-      console.log(player.width);
 
       if (distance < aggroRange && distance > player.width + size) {
         dist = vec2(player.pos.x, player.pos.y);
@@ -104,6 +106,40 @@ export function spawnSpider(position, centerPos, radius, options = {}) {
     moveHandler();
   });
 
+  spider.onHurt(() => {
+    if (spider.hp() <= 0) return;
+
+    const death = add([
+      pos(spider.pos),
+      particles(
+        {
+          max: deathPartsCount,
+          speed: deathPartsSpeed,
+          angle: [0, 360],
+          angularVelocity: [45, 90],
+          lifeTime: [deathPartsLife, deathPartsLife],
+          colors: [rgb(COLORS.foreground)],
+          texture: getSprite("deathParticlies").data.tex,
+          quads: [getSprite("deathParticlies").data.frames[0]],
+        },
+        {
+          lifetime: deathPartsLife,
+          rate: 0,
+          direction: 0,
+          spread: 180,
+        }
+      ),
+      timer(),
+    ]);
+
+    death.emit(deathPartsCount / 3);
+    shake(Math.max(deathShake / 3, 1));
+
+    death.wait(deathPartsLife * 2, () => {
+      destroy(death);
+    });
+  });
+
   spider.onDeath(() => {
     const death = add([
       pos(spider.pos),
@@ -125,12 +161,16 @@ export function spawnSpider(position, centerPos, radius, options = {}) {
           spread: 180,
         }
       ),
+      timer(),
     ]);
 
     death.emit(deathPartsCount);
     shake(deathShake);
     destroy(spider);
 
+    death.wait(deathPartsLife * 2, () => {
+      destroy(death);
+    });
     get("gameManager")[0].addScore(deathScore);
   });
 

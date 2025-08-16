@@ -6,6 +6,7 @@ import App from "./app.js";
 import { test_scene } from "./scenes/testing_scene.js";
 import { death_scene } from "./scenes/death.scene.js";
 import { initShaders } from "./utils/shaders.js";
+import { loadTurret } from "./objects/enemies/turretAR.js";
 
 const k = kaplay({
   background: [COLORS.background],
@@ -19,6 +20,7 @@ fullscreenHandler(k);
 
 loadFont("Tiny", "./fonts/Tiny5-Regular.ttf");
 initShaders();
+await loadTurret();
 
 App.init(k);
 

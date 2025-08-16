@@ -25,13 +25,15 @@ const Cursor = {
     setCursor("none");
 
     const self = this;
-    onUpdate("cursor", (cursorObj) => {
-      cursorObj.pos = mousePos();
+    onUpdate(() => {
+      if (this.c) {
+        this.c.pos = mousePos();
+      }
     });
   },
 
   getCursorPos() {
-    return this.c ? vec2(this.c.pos) : null;
+    return this.c ? this.c.pos : null;
   },
 };
 

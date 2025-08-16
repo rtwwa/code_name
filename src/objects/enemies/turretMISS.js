@@ -1,21 +1,13 @@
 import { COLORS } from "../../config";
 
-export async function loadTurret() {
-  await loadSprite("button", "./sprites/button.png");
-  await loadSprite("dropArea", "./sprites/dropArea.png");
-  await loadSprite("turretAR", "./sprites/turretAR.png");
-  await loadSprite("turretMISS", "./sprites/turretMISS.png");
-  await loadSprite("turretBT", "./sprites/turretBT.png");
-  await loadSprite("turretART", "./sprites/turretART.png");
-  await loadSprite("deathParticlies", "./sprites/dust.png");
-}
-
-export const TURRET_STATS_AR = {
-  bulletCount: 12,
+export const TURRET_STATS_MISS = {
+  bulletCount: 1,
   bulletSpeed: 150,
   hp: 1,
   damage: 1,
-  shootInterval: 2,
+  shootTimes: 1,
+  shootIntervalShort: 0.1,
+  shootIntervalLong: 3,
   bulletSize: 6,
   deathPartsCount: 150,
   deathPartsSpeed: [300, 10],
@@ -24,56 +16,77 @@ export const TURRET_STATS_AR = {
   deathScore: 20,
 };
 
-export function spawnTurretAR(position, options = {}) {
+export function spawnTurretMISS(position, options = {}) {
   const {
-    bulletCount = TURRET_STATS_AR.bulletCount,
-    bulletSpeed = TURRET_STATS_AR.bulletSpeed,
-    hp = TURRET_STATS_AR.hp,
-    damage = TURRET_STATS_AR.damage,
-    shootInterval = TURRET_STATS_AR.shootInterval,
-    bulletSize = TURRET_STATS_AR.bulletSize,
-    deathPartsCount = TURRET_STATS_AR.deathPartsCount,
-    deathPartsSpeed = TURRET_STATS_AR.deathPartsSpeed,
-    deathPartsLife = TURRET_STATS_AR.deathPartsLife,
-    deathShake = TURRET_STATS_AR.deathShake,
-    deathScore = TURRET_STATS_AR.deathScore,
+    bulletCount = TURRET_STATS_MISS.bulletCount,
+    bulletSpeed = TURRET_STATS_MISS.bulletSpeed,
+    hp = TURRET_STATS_MISS.hp,
+    damage = TURRET_STATS_MISS.damage,
+    shootTimes = TURRET_STATS_MISS.shootTimes,
+    shootIntervalShort = TURRET_STATS_MISS.shootIntervalShort,
+    shootIntervalLong = TURRET_STATS_MISS.shootIntervalLong,
+    bulletSize = TURRET_STATS_MISS.bulletSize,
+    deathPartsCount = TURRET_STATS_MISS.deathPartsCount,
+    deathPartsSpeed = TURRET_STATS_MISS.deathPartsSpeed,
+    deathPartsLife = TURRET_STATS_MISS.deathPartsLife,
+    deathShake = TURRET_STATS_MISS.deathShake,
+    deathScore = TURRET_STATS_MISS.deathScore,
   } = options;
 
   const turret = add([
-    sprite("turretAR"),
+    sprite("turretMISS"),
     pos(position),
     area(),
     body(),
     health(hp),
     color(COLORS.foreground),
     anchor("center"),
+    timer(),
     "enemy",
     {
       bulletCount,
       bulletSpeed,
       damage,
-      shootInterval,
     },
   ]);
 
-  function shootCircle() {
-    for (let i = 0; i < turret.bulletCount; i++) {
-      const angle = (i / turret.bulletCount) * Math.PI * 2;
-      const dir = vec2(Math.cos(angle), Math.sin(angle));
+  function shoot() {
+    const spread = Math.PI / 8;
+    const count = 2;
+    const startAngle = -spread / 2;
+    const step = spread / (count - 1);
 
-      add([
-        circle(bulletSize),
-        pos(turret.pos),
-        color(COLORS.foreground),
-        area(),
-        "bullet",
-        { dir, speed: turret.bulletSpeed, damage: turret.damage },
-      ]);
+    for (let j = 0; j < shootTimes; j++) {
+      turret.wait(shootIntervalShort * j, () => {
+        for (let i = 0; i < count; i++) {
+          const playerPos = get("player")[0].pos;
+          const dir = playerPos.sub(turret.pos).unit();
+          const angle = startAngle + i * step;
+
+          const rotatedDir = vec2(
+            dir.x * Math.cos(angle) - dir.y * Math.sin(angle),
+            dir.x * Math.sin(angle) + dir.y * Math.cos(angle)
+          ).unit();
+
+          add([
+            circle(bulletSize),
+            pos(turret.pos),
+            color(COLORS.foreground),
+            area(),
+            "bullet",
+            {
+              dir: rotatedDir,
+              speed: turret.bulletSpeed,
+              damage: turret.damage,
+            },
+          ]);
+        }
+      });
     }
   }
 
-  const shootLoop = loop(turret.shootInterval, () => {
-    shootCircle();
+  const shootLoop = loop(shootIntervalLong, () => {
+    shoot();
   });
 
   turret.onHurt(() => {
@@ -152,17 +165,4 @@ export function spawnTurretAR(position, options = {}) {
   });
 
   return turret;
-}
-
-export function setupBulletLogic(destroyBulletFunc) {
-  onUpdate("bullet", (b) => {
-    b.move(b.dir.scale(b.speed));
-
-    destroyBulletFunc(b);
-  });
-
-  onCollide("bullet", "player", (bullet, player) => {
-    destroy(bullet);
-    player.hurt(bullet.damage);
-  });
 }

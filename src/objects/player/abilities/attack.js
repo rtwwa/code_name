@@ -1,28 +1,72 @@
 import { COLORS } from "../../../config";
 import Cursor from "../../mouse";
 
-const DASH_COOLDOWN = 1.5;
+const ATTACK_COOLDOWN = 1.5;
 const ATTACK_SPAWN_RADIUS = 40;
 
 export async function initAttackAbility(player) {
-  const attackAbility = add([timer()]);
+  const attackIconSprite = await loadSprite("axe", "./sprites/axe.png");
+
+  const attackAbility = add([
+    pos(64, height() - 64),
+    sprite("axe"),
+    scale(1),
+    color(COLORS.foreground),
+    anchor("center"),
+    animate(),
+    timer(),
+  ]);
+
+  attackAbility.canAttack = true;
+  attackAbility.attackCooldown = ATTACK_COOLDOWN;
+  attackAbility.cooldown = 0;
+
+  attackAbility.use(
+    shader("cooldown", () => ({
+      r: player.color.r / 255,
+      g: player.color.g / 255,
+      b: player.color.b / 255,
+      h: 64 * (attackAbility.cooldown / attackAbility.attackCooldown),
+      texSize: vec2(attackIconSprite.tex.width, attackIconSprite.tex.height),
+    }))
+  );
 
   attackAbility.damage = 1;
   attackAbility.maxDist = 150;
   attackAbility.speed = 800;
 
-  let hasDashed = false;
+  let hasAttacked = false;
   let newDist = null;
   let newDir = null;
 
-  // await loadSprite("attackEffect", "./sprites/AttackEffect.png");
+  attackAbility.getCanAttack = () => {
+    return attackAbility.canAttack;
+  };
+
+  attackAbility.animate("scale", [vec2(1, 1), vec2(1.2, 1.2), vec2(1, 1)], {
+    duration: 0.2,
+    direction: "ping-pong",
+    loops: 1,
+  });
 
   attackAbility.Attack = () => {
-    if (hasDashed == true) return;
+    if (!attackAbility.canAttack) return;
+    if (hasAttacked == true) return;
 
-    hasDashed = true;
-    attackAbility.wait(DASH_COOLDOWN, () => {
-      hasDashed = false;
+    attackAbility.scale = vec2(1, 1);
+
+    hasAttacked = true;
+    attackAbility.cooldown = ATTACK_COOLDOWN;
+    const t = attackAbility.loop(0.05, () => {
+      if (attackAbility.cooldown <= 0) {
+        hasAttacked = false;
+        attackAbility.cooldown = 0;
+        attackAbility.animation.seek(0);
+        t.cancel();
+        return;
+      }
+
+      attackAbility.cooldown = attackAbility.cooldown - 0.05;
     });
 
     newDir = attackAbility.getAttackDir();
@@ -48,7 +92,7 @@ export async function initAttackAbility(player) {
 
   attackAbility.onUpdate(() => {
     if (newDist != null) {
-      player.setInv(false);
+      player.setInv(true);
       player.canMove = false;
       player.moveTo(newDist, attackAbility.speed);
 
@@ -57,6 +101,7 @@ export async function initAttackAbility(player) {
 
         objs.map((obj) => {
           if (obj.target.tags.includes("enemy")) {
+            if (!obj.target.hurt) return;
             newDist = null;
             player.canMove = true;
 

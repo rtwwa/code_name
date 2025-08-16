@@ -1,6 +1,7 @@
 const App = {
   kaplayInstance: null,
   currentScene: null,
+  sceneData: {},
 
   init(kaplayInstance) {
     this.kaplayInstance = kaplayInstance;
@@ -12,7 +13,11 @@ const App = {
       return;
     }
 
-    this.kaplayInstance.scene(name, sceneFunc);
+    this.kaplayInstance.scene(name, () => {
+      const data = sceneFunc();
+      this.sceneData[name] = data;
+      return data;
+    });
   },
 
   startScene(name) {
@@ -23,6 +28,10 @@ const App = {
 
     this.currentScene = name;
     this.kaplayInstance.go(name);
+  },
+
+  getCurrentSceneData() {
+    return this.sceneData[this.currentScene];
   },
 };
 
