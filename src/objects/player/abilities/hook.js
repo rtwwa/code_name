@@ -5,8 +5,6 @@ import Cursor from "../../mouse";
 export const HOOK_STATS = { hookCooldown: 5 };
 
 export async function initHookAbility(player) {
-  const hookIconSprite = await loadSprite("hook", "./sprites/hook.png");
-
   const rope = add([
     pos(width() - 64, height() - 64),
     sprite("hook"),
@@ -25,7 +23,7 @@ export async function initHookAbility(player) {
       g: player.color.g / 255,
       b: player.color.b / 255,
       h: 64 * (rope.currentCooldown / rope.hookCooldown),
-      texSize: vec2(hookIconSprite.tex.width, hookIconSprite.tex.height),
+      texSize: vec2(2048, 2048),
     }))
   );
 

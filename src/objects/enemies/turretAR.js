@@ -24,140 +24,140 @@ export const TURRET_STATS_AR = {
   deathScore: 20,
 };
 
-export function spawnTurretAR(position, options = {}) {
-  const {
-    bulletCount = TURRET_STATS_AR.bulletCount,
-    bulletSpeed = TURRET_STATS_AR.bulletSpeed,
-    hp = TURRET_STATS_AR.hp,
-    damage = TURRET_STATS_AR.damage,
-    shootInterval = TURRET_STATS_AR.shootInterval,
-    bulletSize = TURRET_STATS_AR.bulletSize,
-    deathPartsCount = TURRET_STATS_AR.deathPartsCount,
-    deathPartsSpeed = TURRET_STATS_AR.deathPartsSpeed,
-    deathPartsLife = TURRET_STATS_AR.deathPartsLife,
-    deathShake = TURRET_STATS_AR.deathShake,
-    deathScore = TURRET_STATS_AR.deathScore,
-  } = options;
+export function createTurretSpawnerAR(defaults = {}) {
+  const spawnerDefaults = add([{ ...TURRET_STATS_AR }, "sTurretAR"]);
 
-  const turret = add([
-    sprite("turretAR"),
-    pos(position),
-    area(),
-    body(),
-    health(hp),
-    color(COLORS.foreground),
-    anchor("center"),
-    "enemy",
-    {
-      bulletCount,
-      bulletSpeed,
-      damage,
-      shootInterval,
-    },
-  ]);
+  spawnerDefaults.spawn = (position, options = {}) => {
+    const {
+      bulletCount = spawnerDefaults.bulletCount,
+      bulletSpeed = spawnerDefaults.bulletSpeed,
+      hp = spawnerDefaults.hp,
+      damage = spawnerDefaults.damage,
+      shootInterval = spawnerDefaults.shootInterval,
+      bulletSize = spawnerDefaults.bulletSize,
+      deathPartsCount = spawnerDefaults.deathPartsCount,
+      deathPartsSpeed = spawnerDefaults.deathPartsSpeed,
+      deathPartsLife = spawnerDefaults.deathPartsLife,
+      deathShake = spawnerDefaults.deathShake,
+      deathScore = spawnerDefaults.deathScore,
+    } = options;
 
-  function shootCircle() {
-    for (let i = 0; i < turret.bulletCount; i++) {
-      const angle = (i / turret.bulletCount) * Math.PI * 2;
-      const dir = vec2(Math.cos(angle), Math.sin(angle));
+    const turret = add([
+      sprite("turretAR"),
+      pos(position),
+      area(),
+      body(),
+      health(hp),
+      color(COLORS.foreground),
+      anchor("center"),
+      "enemy",
+      {
+        bulletCount,
+        bulletSpeed,
+        damage,
+        shootInterval,
+      },
+    ]);
 
-      add([
-        circle(bulletSize),
-        pos(turret.pos),
-        color(COLORS.foreground),
-        area(),
-        "bullet",
-        { dir, speed: turret.bulletSpeed, damage: turret.damage },
-      ]);
+    function shootCircle() {
+      for (let i = 0; i < turret.bulletCount; i++) {
+        const angle = (i / turret.bulletCount) * Math.PI * 2;
+        const dir = vec2(Math.cos(angle), Math.sin(angle));
+
+        add([
+          circle(bulletSize),
+          pos(turret.pos),
+          color(COLORS.foreground),
+          area(),
+          "bullet",
+          { dir, speed: turret.bulletSpeed, damage: turret.damage },
+        ]);
+      }
     }
-  }
 
-  const shootLoop = loop(turret.shootInterval, () => {
-    shootCircle();
-  });
+    const shootLoop = loop(turret.shootInterval, shootCircle);
 
-  turret.onHurt(() => {
-    if (turret.hp() <= 0) return;
+    turret.onHurt(() => {
+      if (turret.hp() <= 0) return;
 
-    const death = add([
-      pos(turret.pos),
-      particles(
-        {
-          max: deathPartsCount,
-          speed: deathPartsSpeed,
-          angle: [0, 360],
-          angularVelocity: [45, 90],
-          lifeTime: [deathPartsLife, deathPartsLife],
-          colors: [rgb(COLORS.foreground)],
-          texture: getSprite("deathParticlies").data.tex,
-          quads: [getSprite("deathParticlies").data.frames[0]],
-        },
-        {
-          lifetime: deathPartsLife,
-          rate: 0,
-          direction: 0,
-          spread: 180,
-        }
-      ),
-      timer(),
-    ]);
+      const death = add([
+        pos(turret.pos),
+        particles(
+          {
+            max: deathPartsCount,
+            speed: deathPartsSpeed,
+            angle: [0, 360],
+            angularVelocity: [45, 90],
+            lifeTime: [deathPartsLife, deathPartsLife],
+            colors: [rgb(COLORS.foreground)],
+            texture: getSprite("deathParticlies").data.tex,
+            quads: [getSprite("deathParticlies").data.frames[0]],
+          },
+          {
+            lifetime: deathPartsLife,
+            rate: 0,
+            direction: 0,
+            spread: 180,
+          }
+        ),
+        timer(),
+      ]);
 
-    death.emit(deathPartsCount / 3);
-    shake(Math.max(deathShake / 3, 1));
+      death.emit(deathPartsCount / 3);
+      shake(Math.max(deathShake / 3, 1));
 
-    death.wait(deathPartsLife * 2, () => {
-      destroy(death);
-    });
-  });
-
-  turret.onDestroy(() => {
-    shootLoop.cancel();
-    destroy(turret);
-  });
-
-  turret.onDeath(() => {
-    const death = add([
-      pos(turret.pos),
-      particles(
-        {
-          max: deathPartsCount,
-          speed: deathPartsSpeed,
-          angle: [0, 360],
-          angularVelocity: [45, 90],
-          lifeTime: [deathPartsLife, deathPartsLife],
-          colors: [rgb(COLORS.foreground)],
-          texture: getSprite("deathParticlies").data.tex,
-          quads: [getSprite("deathParticlies").data.frames[0]],
-        },
-        {
-          lifetime: deathPartsLife,
-          rate: 0,
-          direction: 0,
-          spread: 180,
-        }
-      ),
-      timer(),
-    ]);
-
-    death.emit(deathPartsCount);
-    shake(deathShake);
-    shootLoop.cancel();
-    destroy(turret);
-
-    death.wait(deathPartsLife * 2, () => {
-      destroy(death);
+      death.wait(deathPartsLife * 2, () => destroy(death));
     });
 
-    get("gameManager")[0].addScore(deathScore);
-  });
+    turret.onDestroy(() => {
+      shootLoop.cancel();
+      destroy(turret);
+    });
 
-  return turret;
+    turret.onDeath(() => {
+      const death = add([
+        pos(turret.pos),
+        particles(
+          {
+            max: deathPartsCount,
+            speed: deathPartsSpeed,
+            angle: [0, 360],
+            angularVelocity: [45, 90],
+            lifeTime: [deathPartsLife, deathPartsLife],
+            colors: [rgb(COLORS.foreground)],
+            texture: getSprite("deathParticlies").data.tex,
+            quads: [getSprite("deathParticlies").data.frames[0]],
+          },
+          {
+            lifetime: deathPartsLife,
+            rate: 0,
+            direction: 0,
+            spread: 180,
+          }
+        ),
+        timer(),
+      ]);
+
+      death.emit(deathPartsCount);
+      shake(deathShake);
+      shootLoop.cancel();
+      destroy(turret);
+
+      death.wait(deathPartsLife * 2, () => destroy(death));
+
+      get("gameManager")[0].addScore(deathScore);
+    });
+
+    return turret;
+  };
+
+  return spawnerDefaults;
 }
 
+// Логика пуль остаётся прежней
 export function setupBulletLogic(destroyBulletFunc) {
   onUpdate("bullet", (b) => {
     b.move(b.dir.scale(b.speed));
-
     destroyBulletFunc(b);
   });
 

@@ -1,7 +1,15 @@
 import { COLORS, DEF_COLORS, setForegroundColor } from "../config";
 import { loadSpider, setupSpiderLogic } from "../objects/enemies/spider";
-import { loadTurret, setupBulletLogic } from "../objects/enemies/turretAR";
-import { setupExplosionDamageLogic } from "../objects/enemies/turretART";
+import {
+  createTurretSpawnerAR,
+  setupBulletLogic,
+} from "../objects/enemies/turretAR";
+import {
+  createTurretSpawnerART,
+  setupExplosionDamageLogic,
+} from "../objects/enemies/turretART";
+import { createTurretSpawnerBT } from "../objects/enemies/turretBT";
+import { createTurretSpawnerMISS } from "../objects/enemies/turretMISS";
 import { createGameManager } from "../objects/gameManager";
 import Cursor from "../objects/mouse";
 import { spawnPlayer } from "../objects/player/player";
@@ -40,15 +48,14 @@ export const test_scene = async () => {
   });
 
   setupExplosionDamageLogic();
-  // spawnTurretBT(vec2(center().x, 150), vec2(center().x, 250));
-  // spawnTurretART(vec2(center().x, 150));
-  // spawnTurretMISS(vec2(center().x, 150));
-  // spawnTurretAR(vec2(center().x, 150));
-  // spawnTurretAR(vec2(center().x, 200), { bulletCount: 24, bulletSpeed: 200 });
 
   await loadSpider();
   setupSpiderLogic();
-  // spawnSpider(center(), centerPos, radius);
+
+  createTurretSpawnerAR();
+  createTurretSpawnerART();
+  createTurretSpawnerBT();
+  createTurretSpawnerMISS();
   const gameManager = await createGameManager(player, centerPos, radius);
 
   const scoreText = add([

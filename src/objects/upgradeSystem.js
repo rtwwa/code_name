@@ -1,9 +1,8 @@
-import { COLORS, DEF_COLORS, setForegroundColor } from "../config";
+import { DEF_COLORS } from "../config";
 import { TURRET_STATS_AR } from "./enemies/turretAR";
 import { TURRET_STATS_ART } from "./enemies/turretART";
 import { TURRET_STATS_BT } from "./enemies/turretBT";
 import { TURRET_STATS_MISS } from "./enemies/turretMISS";
-import { HOOK_STATS } from "./player/abilities/hook";
 
 export async function createUpgradeSystem(player, centerPos, radius) {
   const defIcon = await loadSprite("upgrade", "./sprites/upgrade.png");
@@ -11,6 +10,11 @@ export async function createUpgradeSystem(player, centerPos, radius) {
   const upgrade = add([timer(), "upgradeSystem"]);
   const hb = await player.hookAbility;
   const ab = await player.attackAbility;
+
+  upgrade.ar = get("sTurretAR")[0];
+  upgrade.art = get("sTurretART")[0];
+  upgrade.bt = get("sTurretBT")[0];
+  upgrade.miss = get("sTurretMISS")[0];
 
   upgrade.upgrades = [];
   upgrade.getRandomUpgrade = () => {
@@ -113,18 +117,17 @@ export async function createUpgradeSystem(player, centerPos, radius) {
     s: defIcon,
     text: "Reduces the firing rate\nof all enemies by 30%\n(except spiders)\n but adds +1 HP to them.",
     callback: () => {
-      TURRET_STATS_AR.shootInterval = TURRET_STATS_AR.shootInterval * 1.3;
-      TURRET_STATS_AR.hp = TURRET_STATS_AR.hp + 1;
+      upgrade.ar.shootInterval = upgrade.ar.shootInterval * 1.3;
+      upgrade.ar.hp = upgrade.ar.hp + 1;
 
-      TURRET_STATS_ART.shootInterval = TURRET_STATS_ART.shootInterval * 1.3;
-      TURRET_STATS_ART.hp = TURRET_STATS_ART.hp + 1;
+      upgrade.art.shootInterval = upgrade.art.shootInterval * 1.3;
+      upgrade.art.hp = upgrade.art.hp + 1;
 
-      TURRET_STATS_BT.shootInterval = TURRET_STATS_BT.shootInterval * 1.3;
-      TURRET_STATS_BT.hp = TURRET_STATS_BT.hp + 1;
+      upgrade.bt.shootInterval = upgrade.bt.shootInterval * 1.3;
+      upgrade.bt.hp = upgrade.bt.hp + 1;
 
-      TURRET_STATS_MISS.shootIntervalLong =
-        TURRET_STATS_MISS.shootIntervalLong * 1.3;
-      TURRET_STATS_MISS.hp = TURRET_STATS_MISS.hp + 1;
+      upgrade.miss.shootIntervalLong = upgrade.miss.shootIntervalLong * 1.3;
+      upgrade.miss.hp = upgrade.miss.hp + 1;
     },
   });
 
@@ -132,13 +135,17 @@ export async function createUpgradeSystem(player, centerPos, radius) {
     s: defIcon,
     text: "Reduces bullet size by 30%\nbut adds +1 damage to them",
     callback: () => {
-      TURRET_STATS_AR.bulletSize = TURRET_STATS_AR.bulletSize * 0.7;
+      upgrade.ar.bulletSize = upgrade.ar.bulletSize * 0.2;
+      upgrade.ar.damage = upgrade.ar.damage + 1;
 
-      TURRET_STATS_ART.bulletSize = TURRET_STATS_ART.bulletSize * 0.7;
+      upgrade.art.bulletSize = upgrade.art.bulletSize * 0.2;
+      upgrade.art.damage = upgrade.art.damage + 1;
 
-      TURRET_STATS_BT.bulletSize = TURRET_STATS_BT.bulletSize * 0.7;
+      upgrade.bt.bulletSize = upgrade.bt.bulletSize * 0.2;
+      upgrade.bt.damage = upgrade.bt.damage + 1;
 
-      TURRET_STATS_MISS.bulletSize = TURRET_STATS_MISS.bulletSize * 0.7;
+      upgrade.miss.bulletSize = upgrade.miss.bulletSize * 0.2;
+      upgrade.miss.damage = upgrade.miss.damage + 1;
     },
   });
 
@@ -162,7 +169,7 @@ export async function createUpgradeSystem(player, centerPos, radius) {
     s: defIcon,
     text: "increase attack\n damage by 1\n but also increase\n cooldown by 30%",
     callback: () => {
-      player.damage = player.damage + 1;
+      ab.damage = ab.damage + 1;
       ab.attackCooldown = ab.attackCooldown * 1.3;
     },
   });

@@ -5,14 +5,13 @@ const ATTACK_COOLDOWN = 1.5;
 const ATTACK_SPAWN_RADIUS = 40;
 
 export async function initAttackAbility(player) {
-  const attackIconSprite = await loadSprite("axe", "./sprites/axe.png");
-
   const attackAbility = add([
     pos(64, height() - 64),
     sprite("axe"),
     scale(1),
     color(COLORS.foreground),
     anchor("center"),
+    shader(),
     animate(),
     timer(),
   ]);
@@ -27,7 +26,7 @@ export async function initAttackAbility(player) {
       g: player.color.g / 255,
       b: player.color.b / 255,
       h: 64 * (attackAbility.cooldown / attackAbility.attackCooldown),
-      texSize: vec2(attackIconSprite.tex.width, attackIconSprite.tex.height),
+      texSize: vec2(2048, 2048),
     }))
   );
 
@@ -56,7 +55,7 @@ export async function initAttackAbility(player) {
     attackAbility.scale = vec2(1, 1);
 
     hasAttacked = true;
-    attackAbility.cooldown = ATTACK_COOLDOWN;
+    attackAbility.cooldown = attackAbility.attackCooldown;
     const t = attackAbility.loop(0.05, () => {
       if (attackAbility.cooldown <= 0) {
         hasAttacked = false;

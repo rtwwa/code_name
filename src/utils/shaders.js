@@ -1,4 +1,7 @@
 export function initShaders() {
+  loadSprite("axe", "./sprites/axe.png");
+  loadSprite("hook", "./sprites/hook.png");
+
   loadShader(
     "playerShader",
     null,
